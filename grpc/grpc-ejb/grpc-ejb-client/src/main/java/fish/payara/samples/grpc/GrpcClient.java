@@ -39,7 +39,7 @@
  */
 package fish.payara.samples.grpc;
 
-import io.grpc.Channel;
+import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 
@@ -53,6 +53,7 @@ import java.util.logging.Logger;
 public class GrpcClient {
 
     private static final Logger LOGGER = Logger.getLogger(GrpcClient.class.getName());
+    private final ManagedChannel channel;
     private final PayaraServiceGrpc.PayaraServiceStub stub;
     private CountDownLatch latch;
     private AtomicReference<Throwable> error;
@@ -61,6 +62,7 @@ public class GrpcClient {
         URL myURL = new URL("http://localhost:8080/fish.payara.samples.grpc.PayaraService/communicate"); // URL for the deployed gRPC service
         final GrpcClient client = new GrpcClient(myURL);
         client.communicate();
+        client.channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
     }
 
 
@@ -68,7 +70,7 @@ public class GrpcClient {
      * Create channel to start communication to the gRPC service and create a stub from the channel reference.
      */
     public GrpcClient(URL url) {
-        final Channel channel = ManagedChannelBuilder.forAddress(url.getHost(), url.getPort()).usePlaintext().build();
+        this.channel = ManagedChannelBuilder.forAddress(url.getHost(), url.getPort()).usePlaintext().build();
         this.stub = PayaraServiceGrpc.newStub(channel);
         this.error = new AtomicReference<>(null);
     }
