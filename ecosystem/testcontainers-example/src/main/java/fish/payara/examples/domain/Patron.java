@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.util.Objects;
 
 import java.util.List;
+import java.util.UUID;
 import jakarta.json.bind.annotation.JsonbTransient;
 
 @NamedQueries({
@@ -15,9 +16,21 @@ import jakarta.json.bind.annotation.JsonbTransient;
 @Entity
 public class Patron {
 
+    // Plain @Id, no @GeneratedValue, with an isBlank() check in @PrePersist:
+    // see Librarian.assignId() for the full explanation - patron.xhtml's
+    // "Patron ID:" field is a plain h:inputText bound directly to patronID,
+    // so saving it blank submits "" (not null) for this String property,
+    // which needs the same isBlank() guard to avoid persisting a literal
+    // empty-string id.
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private String patronID;
+
+    @PrePersist
+    private void assignId() {
+        if (patronID == null || patronID.isBlank()) {
+            patronID = UUID.randomUUID().toString();
+        }
+    }
 
     private String name;
 
@@ -29,6 +42,33 @@ public class Patron {
     @OneToMany(mappedBy = "patron")
     private List<Loan> loans;
 
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 97 * hash + Objects.hashCode(this.patronID);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Patron other = (Patron) obj;
+        return Objects.equals(this.patronID, other.patronID);
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(name);
+    }
 
     // Getters and setters
 
@@ -70,33 +110,6 @@ public class Patron {
 
     public void setLoans(List<Loan> loans) {
         this.loans = loans;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 3;
-        hash = 97 * hash + Objects.hashCode(this.patronID);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Patron other = (Patron) obj;
-        return Objects.equals(this.patronID, other.patronID);
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(name);
     }
 
 }

@@ -34,12 +34,29 @@ To run the tests for the application locally, follow these steps:
 
 2. Make sure you have the appropriate Java version installed.
 
-3. Execute the following command:
+3. Make sure [Docker](https://www.docker.com/products/docker-desktop/) is installed and running. The integration
+   tests (`*IT.java`) use [Testcontainers](https://testcontainers.com/) to start a real Payara Micro instance with
+   the application deployed, so Docker needs to be reachable from the JVM running the tests. If you hit
+   `Could not find a valid Docker environment` on Windows even though `docker` works fine from the shell, see
+   [Testcontainers' Windows troubleshooting guide](https://java.testcontainers.org/supported_docker_environment/windows/).
+
+4. Execute the following command:
 
 ```
 ./mvn clean verify
 ```
 
+### What gets tested
+
+- `*ServiceIT` (`fish.payara.examples.service`) — REST API tests hitting the deployed application directly with a
+  JAX-RS client.
+- `*UiIT` (`fish.payara.examples.ui`) — browser tests driving the JSF pages (Book, Patron, Librarian, Loan) end to
+  end with [Playwright](https://playwright.dev/java/). The Playwright Chromium browser binary is installed
+  automatically as part of the build (see the `exec-maven-plugin` execution in `pom.xml`) — no separate setup step
+  is needed.
+
+Both sets of IT tests share a single Payara Micro Testcontainer for the whole test run (see
+`fish.payara.examples.testcontainers.AbstractContainerIT`), so it's started once instead of once per test class.
 
 
 

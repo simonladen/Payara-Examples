@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.util.Objects;
 
 import java.util.List;
+import java.util.UUID;
 import jakarta.json.bind.annotation.JsonbTransient;
 
 @NamedQueries({
@@ -14,9 +15,32 @@ import jakarta.json.bind.annotation.JsonbTransient;
 @Entity
 public class Librarian {
 
+    // Plain @Id, no @GeneratedValue: JPA's generation strategies (IDENTITY/
+    // SEQUENCE/TABLE/AUTO) target numeric surrogate keys; for a String @Id
+    // we assign it ourselves in @PrePersist instead. Checking isBlank() (not
+    // just null) matters: librarian.xhtml's "Librarian ID:" field is a plain
+    // h:inputText bound directly to this property, and unlike a numeric
+    // property (where JSF's implicit converter turns an empty submission into
+    // null), a String property gets the submitted value verbatim - so saving
+    // the form with that field left blank sets librarianID to "" rather than
+    // null. That empty string is not null, so it silently passed the create/
+    // edit check as "already has an id" and, before this fix, also passed
+    // this method's null check unchanged - persisting the row with a literal
+    // empty-string id. It looked fine in this page's own list (name/actions
+    // still worked), but broke anything that keyed off "does this entity have
+    // an id yet": the loan.xhtml dropdown's converter treats "" the same as
+    // "no id" and renders it as an empty <option value="">, indistinguishable
+    // from the "no selection" placeholder - so selecting that librarian for a
+    // loan silently saved as no librarian at all.
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private String librarianID;
+
+    @PrePersist
+    private void assignId() {
+        if (librarianID == null || librarianID.isBlank()) {
+            librarianID = UUID.randomUUID().toString();
+        }
+    }
 
     private String name;
 
@@ -26,6 +50,33 @@ public class Librarian {
     @OneToMany(mappedBy = "librarian")
     private List<Loan> loansManageds;
 
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 97 * hash + Objects.hashCode(this.librarianID);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Librarian other = (Librarian) obj;
+        return Objects.equals(this.librarianID, other.librarianID);
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(name);
+    }
 
     // Getters and setters
 
@@ -59,33 +110,6 @@ public class Librarian {
 
     public void setLoansManageds(List<Loan> loansManageds) {
         this.loansManageds = loansManageds;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 3;
-        hash = 97 * hash + Objects.hashCode(this.librarianID);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Librarian other = (Librarian) obj;
-        return Objects.equals(this.librarianID, other.librarianID);
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(name);
     }
 
 }

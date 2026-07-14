@@ -1,46 +1,25 @@
 package fish.payara.examples.service;
 
 import fish.payara.examples.domain.Patron;
-import fish.payara.examples.testcontainers.PayaraMicroContainer;
-import jakarta.ws.rs.client.*;
-import jakarta.ws.rs.core.*;
-import org.junit.jupiter.api.*;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.GenericType;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class PatronServiceIT {
+class PatronServiceIT extends AbstractServiceIT {
 
-    private static final String PAYARA_MICRO_VERSION = "6.2025.10";
-    private static final int EXPOSED_PORT = 8080;
-
-    @Container
-    private static final PayaraMicroContainer payara = new PayaraMicroContainer(
-            DockerImageName.parse("payara/micro:" + PAYARA_MICRO_VERSION))
-            .withExposedPorts(EXPOSED_PORT)
-            .withDeploymentPath("target/testcontainers-example-1.0.0.war");
-
-    private Client client;
-    private WebTarget baseTarget;
-
-    @BeforeEach
-    void setUp() {
-        client = ClientBuilder.newClient();
-        String appUrl = payara.getApplicationUrl();
-        String separator = appUrl.endsWith("/") ? "" : "/";
-        String baseUri = appUrl + separator + "application/resources/patrons";
-        baseTarget = client.target(baseUri);
-    }
-
-    @AfterEach
-    void tearDown() {
-        client.close();
+    @Override
+    protected String resourcePath() {
+        return "resources/patrons";
     }
 
     @Test

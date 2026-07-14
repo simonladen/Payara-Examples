@@ -61,7 +61,7 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>1.21.1</version>
+            <version>1.21.4</version>
             <scope>test</scope>
             <type>jar</type>
         </dependency>
@@ -117,6 +117,35 @@
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                 </configuration>
+            </plugin>
+            <!-- Installs the Playwright browser binaries (used by the *UiIT tests) before the
+                 integration-test phase runs. Uses exec:exec (a real child process) rather than
+                 exec:java, because com.microsoft.playwright.CLI calls System.exit() internally,
+                 which would otherwise kill the whole Maven JVM. -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.6.3</version>
+                <executions>
+                    <execution>
+                        <id>install-playwright-browsers</id>
+                        <phase>generate-test-resources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>java</executable>
+                            <classpathScope>test</classpathScope>
+                            <arguments>
+                                <argument>-classpath</argument>
+                                <classpath/>
+                                <argument>com.microsoft.playwright.CLI</argument>
+                                <argument>install</argument>
+                                <argument>chromium</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <!-- Execute 'mvn clean package payara-micro:dev' to run the application. -->
             <plugin>
@@ -201,6 +230,8 @@
                             </includes>
                             <systemPropertyVariables>
                                 <payara.microJar>${project.build.directory}/payara-micro-${payara.version}.jar</payara.microJar>
+                                <payara.version>${payara.version}</payara.version>
+                                <war.path>${project.build.directory}/${project.build.finalName}.war</war.path>
                             </systemPropertyVariables>
                         </configuration>
                     </execution>

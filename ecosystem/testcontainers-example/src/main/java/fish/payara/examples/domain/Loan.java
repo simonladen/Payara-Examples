@@ -13,8 +13,15 @@ import java.time.LocalDateTime;
 @Entity
 public class Loan {
 
+    // GenerationType.TABLE (not AUTO or IDENTITY): EclipseLink's AUTO resolution for a
+    // numeric @Id on H2 still picks the platform's native IDENTITY column generation,
+    // which produces "INTEGER IDENTITY NOT NULL" DDL that this H2 version's parser
+    // rejects (a real schema-creation failure, not a test issue - see the container
+    // logs: CREATE TABLE LOAN fails, so the table never exists). TABLE forces the same
+    // EclipseLink default table-based generator (the SEQUENCE table) that Book/Patron/
+    // Librarian's AUTO-strategy String ids already use successfully.
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.TABLE)
     private Integer loanID;
 
     private LocalDateTime loanDate;
@@ -33,6 +40,33 @@ public class Loan {
     @JoinColumn(name = "book_id")
     private Book book;
 
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 97 * hash + Objects.hashCode(this.loanID);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Loan other = (Loan) obj;
+        return Objects.equals(this.loanID, other.loanID);
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(loanID);
+    }
 
     // Getters and setters
 
@@ -82,33 +116,6 @@ public class Loan {
 
     public void setBook(Book book) {
         this.book = book;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 3;
-        hash = 97 * hash + Objects.hashCode(this.loanID);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Loan other = (Loan) obj;
-        return Objects.equals(this.loanID, other.loanID);
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(loanID);
     }
 
 }

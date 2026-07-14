@@ -32,7 +32,9 @@ public class BookBean implements Serializable {
         return null;
     }
     public String save() {
-        if (book.getIsbn() == null) {
+        // isBlank(), not just == null: see LibrarianBean#save for why a
+        // plain h:inputText bound to a String id needs this guard too.
+        if (book.getIsbn() == null || book.getIsbn().isBlank()) {
              bookService.create(book);
         } else {
              bookService.edit(book);

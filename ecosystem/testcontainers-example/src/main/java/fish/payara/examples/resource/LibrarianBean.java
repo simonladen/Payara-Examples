@@ -32,7 +32,12 @@ public class LibrarianBean implements Serializable {
         return null;
     }
     public String save() {
-        if (librarian.getLibrarianID() == null) {
+        // isBlank(), not just == null: librarian.xhtml's id field is a plain
+        // h:inputText, so saving it with that field left blank submits ""
+        // rather than null (see Librarian.assignId() for the full story).
+        // Without this check, "" reads as "already has an id" and this would
+        // call edit()/merge() on a brand new librarian instead of create().
+        if (librarian.getLibrarianID() == null || librarian.getLibrarianID().isBlank()) {
              librarianService.create(librarian);
         } else {
              librarianService.edit(librarian);

@@ -32,7 +32,9 @@ public class PatronBean implements Serializable {
         return null;
     }
     public String save() {
-        if (patron.getPatronID() == null) {
+        // isBlank(), not just == null: see LibrarianBean#save for why a
+        // plain h:inputText bound to a String id needs this guard too.
+        if (patron.getPatronID() == null || patron.getPatronID().isBlank()) {
              patronService.create(patron);
         } else {
              patronService.edit(patron);
