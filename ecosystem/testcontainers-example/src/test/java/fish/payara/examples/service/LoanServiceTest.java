@@ -39,7 +39,6 @@
  */
 package fish.payara.examples.service;
 
-import fish.payara.examples.domain.Book;
 import fish.payara.examples.domain.Loan;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -91,7 +90,8 @@ class LoanServiceTest {
     @Test
     void createAndFind() {
         Loan loan = new Loan();
-        loan.setLoanDate(LocalDateTime.now());
+        LocalDateTime loanDate = LocalDateTime.now();
+        loan.setLoanDate(loanDate);
         doNothing().when(entityManager).persist(any(Loan.class));
 
         loanService.create(loan);
@@ -100,6 +100,7 @@ class LoanServiceTest {
         when(entityManager.find(eq(Loan.class), eq(1))).thenReturn(loan);
         Loan found = loanService.find(1);
         assertNotNull(found);
+        assertEquals(loanDate, found.getLoanDate());
     }
 
     @Test
@@ -110,20 +111,26 @@ class LoanServiceTest {
 
         CriteriaBuilder cb = mock(CriteriaBuilder.class);
         CriteriaQuery cq = mock(CriteriaQuery.class);
-        Root<Book> root = mock(Root.class);
+        Root<Loan> root = mock(Root.class);
 
         when(entityManager.getCriteriaBuilder()).thenReturn(cb);
         when(cb.createQuery()).thenReturn(cq);
-        when(cq.from(Book.class)).thenReturn(root);
+        // Must match AbstractService#findAll's cq.from(entityClass) call, i.e.
+        // Loan.class - not the entity type of some other service. Getting
+        // this wrong wouldn't fail the test (entityManager.createQuery(cq) is
+        // stubbed by the cq instance, not by what it was built with), so the
+        // verify(cq).from(...) below is what actually catches a mismatch.
+        when(cq.from(Loan.class)).thenReturn(root);
         when(cq.select(root)).thenReturn(cq);
 
         @SuppressWarnings("unchecked")
         TypedQuery<Loan> typedQuery = mock(TypedQuery.class);
         when(entityManager.createQuery(cq)).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(list);
-        when(entityManager.createQuery(any(), eq(Loan.class))).thenReturn(typedQuery);
 
         List<Loan> result = loanService.findAll();
+
+        verify(cq).from(Loan.class);
         assertEquals(2, result.size());
     }
 

@@ -106,6 +106,7 @@ class PatronServiceIT extends AbstractServiceIT {
                 .post(Entity.entity(patron, MediaType.APPLICATION_JSON));
 
         String location = createResponse.getHeaderString("Location");
+        assertNotNull(location, "Location header missing after create");
 
         patron.setEmail("jane.updated@example.com");
         Response updateResponse = client.target(location)
@@ -113,6 +114,17 @@ class PatronServiceIT extends AbstractServiceIT {
                 .put(Entity.entity(patron, MediaType.APPLICATION_JSON));
 
         assertEquals(Response.Status.OK.getStatusCode(), updateResponse.getStatus());
+
+        // The PUT response just echoes back the client's own request body, so
+        // it can't tell us whether the update actually persisted - only a
+        // fresh GET can (see BookServiceIT/LibrarianServiceIT for the same
+        // pattern).
+        Patron updated = client.target(location)
+                .request(MediaType.APPLICATION_JSON)
+                .get(Patron.class);
+
+        assertEquals("jane.updated@example.com", updated.getEmail());
+        assertEquals("Jane Doe", updated.getName());
     }
 
     @Test
@@ -127,7 +139,17 @@ class PatronServiceIT extends AbstractServiceIT {
                 .post(Entity.entity(patron, MediaType.APPLICATION_JSON));
 
         String location = createResponse.getHeaderString("Location");
+        assertNotNull(location, "Location header missing after create");
+
         Response deleteResponse = client.target(location).request().delete();
         assertEquals(Response.Status.NO_CONTENT.getStatusCode(), deleteResponse.getStatus());
+
+        // Confirm the delete actually took effect in the datastore, not just
+        // that the DELETE call itself returned 204 (see BookServiceIT/
+        // LibrarianServiceIT for the same pattern).
+        Response getResponse = client.target(location)
+                .request(MediaType.APPLICATION_JSON)
+                .get();
+        assertEquals(Response.Status.NOT_FOUND.getStatusCode(), getResponse.getStatus());
     }
 }

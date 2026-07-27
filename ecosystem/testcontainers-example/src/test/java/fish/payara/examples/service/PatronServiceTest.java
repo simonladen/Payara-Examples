@@ -39,7 +39,6 @@
  */
 package fish.payara.examples.service;
 
-import fish.payara.examples.domain.Book;
 import fish.payara.examples.domain.Patron;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -110,20 +109,26 @@ class PatronServiceTest {
 
         CriteriaBuilder cb = mock(CriteriaBuilder.class);
         CriteriaQuery cq = mock(CriteriaQuery.class);
-        Root<Book> root = mock(Root.class);
+        Root<Patron> root = mock(Root.class);
 
         when(entityManager.getCriteriaBuilder()).thenReturn(cb);
         when(cb.createQuery()).thenReturn(cq);
-        when(cq.from(Book.class)).thenReturn(root);
+        // Must match AbstractService#findAll's cq.from(entityClass) call, i.e.
+        // Patron.class - not the entity type of some other service. Getting
+        // this wrong wouldn't fail the test (entityManager.createQuery(cq) is
+        // stubbed by the cq instance, not by what it was built with), so the
+        // verify(cq).from(...) below is what actually catches a mismatch.
+        when(cq.from(Patron.class)).thenReturn(root);
         when(cq.select(root)).thenReturn(cq);
 
         @SuppressWarnings("unchecked")
         TypedQuery<Patron> typedQuery = mock(TypedQuery.class);
         when(entityManager.createQuery(cq)).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(list);
-        when(entityManager.createQuery(any(), eq(Patron.class))).thenReturn(typedQuery);
 
         List<Patron> result = patronService.findAll();
+
+        verify(cq).from(Patron.class);
         assertNotNull(result);
         assertEquals(2, result.size());
     }

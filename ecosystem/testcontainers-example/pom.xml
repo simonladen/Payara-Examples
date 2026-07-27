@@ -175,10 +175,19 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
-                            <skipCache>true</skipCache>
+                            <!-- Was `true`: forced a fresh ~unpinned "master" tarball on every
+                                 single build, so every build re-hit GitHub's (slow, on-demand)
+                                 archive generation for a fairly large repo - the direct cause of
+                                 the "Read timed out" failures. `false` lets the plugin reuse its
+                                 local cache once the download has succeeded once. -->
+                            <skipCache>false</skipCache>
                             <url>https://github.com/swagger-api/swagger-ui/archive/master.tar.gz</url>
                             <unpack>true</unpack>
                             <outputDirectory>${project.build.directory}</outputDirectory>
+                            <!-- Give GitHub's archive generation more room before giving up,
+                                 and retry a few times before failing the build. -->
+                            <readTimeOut>60000</readTimeOut>
+                            <retries>5</retries>
                         </configuration>
                     </execution>
                 </executions>
