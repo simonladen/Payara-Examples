@@ -47,7 +47,7 @@ import org.junit.jupiter.api.Test;
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
 /**
- * Exercises the "Loan" JSF page (loan.xhtml). Unlike the other entities, a
+ * Tests the "Loan" JSF page (loan.xhtml). Unlike the other entities, a
  * loan is created by picking an existing librarian, patron and book from
  * dropdowns, so this test first creates one of each through their own pages
  * (reusing the same browser session) before creating, editing and deleting

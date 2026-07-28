@@ -54,27 +54,6 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * REST integration test for {@code LoanResource}. A loan references an
- * existing librarian, patron and book by id (see {@code Loan}'s
- * {@code @ManyToOne} fields), so each test first creates one of each through
- * their own REST resources - mirroring what {@code LoanUiIT} does through the
- * browser (see its class Javadoc) - before creating, reading, updating or
- * deleting the loan itself.
- *
- * <p>Request bodies and responses here are handled as plain {@code Map}/JSON
- * trees rather than mapped onto the {@code Loan}/{@code Librarian}/... domain
- * classes. Reason: {@code Loan} has {@code LocalDateTime} fields, and this
- * test's JAX-RS client only has Jersey's Jackson provider on its classpath
- * (see the {@code jersey-media-json-jackson} test dependency in pom.xml) -
- * unlike the server's built-in JSON-B (Yasson) provider, plain Jackson has no
- * {@code java.time} module registered by default, so binding a response
- * straight onto {@code Loan.class} would fail client-side even though the
- * server itself handles those fields correctly. Plain {@code Map}s/{@code
- * String}s for the date fields sidestep that entirely; {@code BookServiceIT}/
- * {@code LibrarianServiceIT}/{@code PatronServiceIT} don't need this because
- * none of those entities have a date field.
- */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class LoanServiceIT extends AbstractServiceIT {
 

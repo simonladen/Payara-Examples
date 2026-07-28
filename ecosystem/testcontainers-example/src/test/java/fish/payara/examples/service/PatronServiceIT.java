@@ -115,10 +115,6 @@ class PatronServiceIT extends AbstractServiceIT {
 
         assertEquals(Response.Status.OK.getStatusCode(), updateResponse.getStatus());
 
-        // The PUT response just echoes back the client's own request body, so
-        // it can't tell us whether the update actually persisted - only a
-        // fresh GET can (see BookServiceIT/LibrarianServiceIT for the same
-        // pattern).
         Patron updated = client.target(location)
                 .request(MediaType.APPLICATION_JSON)
                 .get(Patron.class);
@@ -144,9 +140,6 @@ class PatronServiceIT extends AbstractServiceIT {
         Response deleteResponse = client.target(location).request().delete();
         assertEquals(Response.Status.NO_CONTENT.getStatusCode(), deleteResponse.getStatus());
 
-        // Confirm the delete actually took effect in the datastore, not just
-        // that the DELETE call itself returned 204 (see BookServiceIT/
-        // LibrarianServiceIT for the same pattern).
         Response getResponse = client.target(location)
                 .request(MediaType.APPLICATION_JSON)
                 .get();

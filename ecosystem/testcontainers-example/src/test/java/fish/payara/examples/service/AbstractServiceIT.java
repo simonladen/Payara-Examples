@@ -43,6 +43,7 @@ import fish.payara.examples.testcontainers.AbstractContainerIT;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.WebTarget;
+import org.glassfish.jersey.jackson.JacksonFeature;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -50,10 +51,10 @@ import org.junit.jupiter.api.BeforeEach;
  * Base class for the REST integration tests running against the shared
  * Payara Micro Testcontainer (see {@link AbstractContainerIT}).
  *
- * <p>Subclasses only need to implement {@link #resourcePath()} to say which
+ * Subclasses only need to implement {@link #resourcePath()} to say which
  * REST resource they exercise; the JAX-RS {@link Client} and the
  * {@link #baseTarget} pointing at that resource are set up and torn down
- * automatically before/after each test.</p>
+ * automatically before/after each test.
  */
 abstract class AbstractServiceIT extends AbstractContainerIT {
 
@@ -62,7 +63,7 @@ abstract class AbstractServiceIT extends AbstractContainerIT {
 
     @BeforeEach
     void setUpClient() {
-        client = ClientBuilder.newClient();
+        client = ClientBuilder.newClient().register(JacksonFeature.class);
         baseTarget = client.target(applicationContextUrl() + resourcePath());
     }
 
@@ -73,10 +74,5 @@ abstract class AbstractServiceIT extends AbstractContainerIT {
         }
     }
 
-    /**
-     * Resource path, relative to the application's "application" context
-     * (see {@link fish.payara.examples.testcontainers.AbstractContainerIT#APPLICATION_CONTEXT}),
-     * exercised by the subclass, e.g. {@code "resources/books"}.
-     */
     protected abstract String resourcePath();
 }

@@ -46,7 +46,7 @@ import org.junit.jupiter.api.Test;
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
 /**
- * Exercises the "Librarian" JSF page (librarian.xhtml): create, edit and
+ * Tests the "Librarian" JSF page (librarian.xhtml): create, edit and
  * delete a librarian through the browser, driven by Playwright against the
  * deployed application.
  */

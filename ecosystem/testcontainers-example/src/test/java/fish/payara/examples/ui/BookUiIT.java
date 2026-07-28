@@ -46,7 +46,7 @@ import org.junit.jupiter.api.Test;
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
 /**
- * Exercises the "Book" JSF page (book.xhtml): create, edit and delete a book
+ * Tests the "Book" JSF page (book.xhtml): create, edit and delete a book
  * through the browser, driven by Playwright against the deployed application.
  */
 class BookUiIT extends AbstractUiIT {

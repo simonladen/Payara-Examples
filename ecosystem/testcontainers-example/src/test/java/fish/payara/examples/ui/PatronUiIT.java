@@ -57,8 +57,6 @@ class PatronUiIT extends AbstractUiIT {
         String name = unique("Playwright Patron");
 
         navigateTo("patron.xhtml");
-        // Leave the Patron ID field blank: it's auto-generated on create, same
-        // as the REST API path (see PatronBean#save / AbstractService#create).
         page.getByLabel("Name:").fill(name);
         page.getByLabel("Address:").fill("1 Library Way");
         page.getByLabel("Email:").fill("patron@example.com");

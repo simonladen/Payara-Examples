@@ -113,15 +113,9 @@ class LibrarianServiceTest {
 
         when(entityManager.getCriteriaBuilder()).thenReturn(cb);
         when(cb.createQuery()).thenReturn(cq);
-        // Must match AbstractService#findAll's cq.from(entityClass) call, i.e.
-        // Librarian.class - not the entity type of some other service. Getting
-        // this wrong wouldn't fail the test (entityManager.createQuery(cq) is
-        // stubbed by the cq instance, not by what it was built with), so the
-        // verify(cq).from(...) below is what actually catches a mismatch.
         when(cq.from(Librarian.class)).thenReturn(root);
         when(cq.select(root)).thenReturn(cq);
 
-        @SuppressWarnings("unchecked")
         TypedQuery<Librarian> typedQuery = mock(TypedQuery.class);
         when(entityManager.createQuery(cq)).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(list);

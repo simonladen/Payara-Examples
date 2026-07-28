@@ -47,13 +47,6 @@ import org.testcontainers.utility.MountableFile;
 /**
  * A Testcontainers {@link GenericContainer} pre-configured to run Payara Micro
  * with the application WAR deployed.
- *
- * <p>The no-arg constructor is fully self-configuring: it reads the Payara
- * Micro version and the path to the WAR file from the {@code payara.version}
- * and {@code war.path} system properties. Those properties are populated from
- * the Maven {@code payara.version} property and the build output directory by
- * the failsafe plugin (see pom.xml), so the version only needs to be defined
- * once for the whole build instead of being repeated in every IT test.</p>
  */
 public class PayaraMicroContainer extends GenericContainer<PayaraMicroContainer> {
 
@@ -61,10 +54,6 @@ public class PayaraMicroContainer extends GenericContainer<PayaraMicroContainer>
     private static final String DEFAULT_CONTEXT_PATH = "/";
     protected static final String CONTEXT = "ObservabilityTool";
 
-    /**
-     * Fully self-configured container: version and WAR path are resolved from
-     * the {@code payara.version} / {@code war.path} system properties set by Maven.
-     */
     public PayaraMicroContainer() {
         this(DockerImageName.parse("payara/micro:" + requiredProperty("payara.version")));
         withDeploymentPath(requiredProperty("war.path"));

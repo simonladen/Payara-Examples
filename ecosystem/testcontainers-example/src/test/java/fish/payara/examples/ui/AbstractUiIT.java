@@ -70,8 +70,8 @@ import java.util.UUID;
  * <p>One headless Chromium instance is launched per test class (JUnit 5 runs
  * {@code @BeforeAll}/{@code @AfterAll} around each concrete subclass); each
  * individual test then gets its own {@link BrowserContext}/{@link Page} so
- * tests don't leak cookies or state into one another. Note: the Playwright
- * {@code chromium} browser binary needs to be installed once, which the
+ * tests don't leak cookies or state into one another.
+ * Note: the Playwright {@code chromium} browser binary needs to be installed once, which the
  * build's {@code generate-test-resources} phase does automatically (see the
  * exec-maven-plugin execution in pom.xml).</p>
  *
@@ -114,13 +114,6 @@ public abstract class AbstractUiIT extends AbstractContainerIT {
         page.onDialog(Dialog::accept);
     }
 
-    /**
-     * Navigates to a JSF page relative to the deployed application's
-     * "application" context, e.g. {@code "book.xhtml"} navigates to
-     * {@code http://host:port/application/book.xhtml} - the JSF pages live in
-     * the same WAR as the REST resources, under the same context path (see
-     * {@link fish.payara.examples.testcontainers.AbstractContainerIT#APPLICATION_CONTEXT}).
-     */
     protected Page navigateTo(String relativePath) {
         page.navigate(applicationContextUrl() + relativePath);
         return page;
